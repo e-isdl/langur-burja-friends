@@ -1,0 +1,14 @@
+{
+  "name": "langur-burja-friends",
+  "version": "1.0.0",
+  "description": "Private multiplayer card & dice room server for friends (Langur Burja + 9 more games)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "live": "node live.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}

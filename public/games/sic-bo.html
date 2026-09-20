@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Sic Bo — 3D Dice</title>
+<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+<script src="../shared/three-env.js"></script>
+<script src="../shared/sound.js"></script>
+<script src="../shared/ws-client.js"></script>
+<style>
+  :root{--bg:#0a1410;--card:#12241a;--line:#234d33;--txt:#f2f5ef;--mut:#9fb8a6;--gold:#e8b64c;--acc:#22c55e;--red:#ef4444;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100%;}
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+  #topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0a1710;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+  #topbar h1{font-size:15px;margin:0;} #topbar h1 small{display:block;font-size:11px;color:var(--mut);font-weight:400;}
+  #timerPill{margin-left:auto;font-size:12px;background:#1c3a28;border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap;}
+  #timerPill.hot{background:#3f1d1d;border-color:var(--red);color:#fecaca;}
+  #hostPill{font-size:11px;background:#3b2f08;border:1px solid var(--gold);color:var(--gold);padding:4px 8px;border-radius:999px;display:none;}
+  .tbtn{background:#1c3a28;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:13px;cursor:pointer;}
+  #layout{flex:1;display:flex;flex-direction:column;}
+  #sidebar{background:#0d2015;border-bottom:1px solid var(--line);padding:8px 12px;}
+  #sidebar h3{margin:2px 0 6px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;}
+  #playerList{list-style:none;margin:0;padding:0;display:flex;gap:8px;overflow-x:auto;}
+  #playerList li{min-width:128px;flex:0 0 auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;font-size:12px;}
+  #playerList li.me{border-color:var(--gold);}
+  #playerList .bal{color:var(--gold);font-weight:800;}
+  #main{flex:1;display:flex;flex-direction:column;gap:10px;padding:10px 12px 20px;max-width:1080px;width:100%;margin:0 auto;}
+  #stageWrap{position:relative;width:100%;height:40vh;min-height:260px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(circle at 50% 30%,#14532d 0%,#0a1410 70%);}
+  #stage{width:100%;height:100%;display:block;}
+  #resultPanel{position:absolute;left:10px;top:10px;background:rgba(6,14,9,.93);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;font-size:12px;display:none;max-width:270px;z-index:5;}
+  #resultPanel.show{display:block;} #resultPanel h4{margin:0 0 4px;color:var(--gold);font-size:13px;}
+  #resultPanel .dice{font-size:26px;} .pos{color:var(--acc);} .neg{color:#f87171;}
+  #betTimer{height:6px;background:#1c3a28;border-radius:99px;overflow:hidden;} #betTimer i{display:block;height:100%;width:100%;background:var(--gold);transition:width .3s;}
+  #controls{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;}
+  .secT{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+  #chips{display:flex;gap:8px;} .chip{flex:1;padding:10px;border-radius:999px;border:2px solid var(--line);background:#0f2418;color:var(--txt);font-weight:800;cursor:pointer;}
+  .chip.sel{border-color:var(--gold);background:#2a2307;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+  .bet{position:relative;border:1px solid var(--line);background:#0f2418;color:var(--txt);border-radius:10px;padding:9px 4px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;line-height:1.25;}
+  .bet small{display:block;font-weight:400;color:var(--mut);font-size:10px;}
+  .bet.mine{border-color:var(--gold);background:#2a2307;}
+  .bet .dots{position:absolute;top:3px;right:5px;font-size:9px;color:var(--gold);}
+  .bet.hit{border-color:var(--acc);box-shadow:0 0 0 2px rgba(34,197,94,.4);} .bet.miss{opacity:.45;}
+  #comboRow{display:flex;gap:6px;flex-wrap:wrap;}
+  #myBets{font-size:12px;color:#cde9d4;background:#0d1f15;border:1px dashed var(--line);border-radius:10px;padding:8px;min-height:34px;}
+  #actionRow{display:flex;gap:8px;} #rollBtn,#nextBtn{flex:1;padding:13px;border-radius:12px;border:0;font-weight:800;font-size:15px;cursor:pointer;}
+  #rollBtn{background:var(--acc);color:#04140a;} #rollBtn:disabled{opacity:.4;} #nextBtn{background:var(--gold);color:#231a02;display:none;}
+  #status{font-size:12px;color:var(--mut);text-align:center;}
+  #podium{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  #podium.show{display:flex;} #podium .card{background:#0f2418;border:1px solid var(--gold);border-radius:16px;padding:18px;max-width:360px;width:100%;}
+  @media (orientation:landscape) and (min-width:760px){
+    #layout{flex-direction:row;align-items:flex-start;} #sidebar{width:230px;min-height:calc(100vh - 53px);border:0;border-right:1px solid var(--line);position:sticky;top:53px;}
+    #playerList{flex-direction:column;overflow:visible;} #main{flex-direction:row;align-items:flex-start;}
+    #stageCol{flex:1;} #controls{flex:1;} #stageWrap{height:56vh;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div style="font-size:20px">🎲</div>
+    <h1>Sic Bo 3D<small>small/big • triples • totals 4–17</small></h1>
+    <span id="hostPill">HOST</span>
+    <span id="timerPill">Bets 30s</span>
+    <button class="tbtn" id="soundBtn">🔊</button>
+    <button class="tbtn" id="endBtn">🏁</button>
+  </header>
+  <div id="layout">
+    <aside id="sidebar">
+      <h3>Players (<span id="pcount">1</span>)</h3>
+      <ul id="playerList"></ul>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="tbtn" id="addBotBtn">+ Bot</button><button class="tbtn" id="copyLinkBtn">🔗 Invite</button></div>
+    </aside>
+    <main id="main">
+      <div id="stageCol" style="flex:1;min-width:0">
+        <div id="stageWrap"><canvas id="stage"></canvas><div id="resultPanel"></div></div>
+        <div style="height:8px"></div>
+        <div id="betTimer"><i id="betBar"></i></div>
+        <div id="status" style="margin-top:6px">Place bets — 30s window.</div>
+      </div>
+      <div id="controls">
+        <div><div class="secT">Chip</div><div id="chips">
+          <button class="chip sel" data-c="5">5</button>
+          <button class="chip" data-c="10">10</button>
+          <button class="chip" data-c="25">25</button>
+        </div></div>
+        <div><div class="secT">Small / Big (1:1, lose on triple)</div><div class="grid2">
+          <button class="bet" data-k="small">SMALL 4–10<small>1:1</small></button>
+          <button class="bet" data-k="big">BIG 11–17<small>1:1</small></button>
+        </div></div>
+        <div><div class="secT">Specific triple 150:1 (pick 1)</div><div class="grid6" id="tripGrid"></div></div>
+        <div><div class="secT">Any triple 24:1 • Doubles 8:1</div><div class="grid2" style="margin-bottom:6px">
+          <button class="bet" data-k="anytrip">ANY TRIPLE<small>24:1</small></button>
+          <button class="bet" disabled style="opacity:.6">DOUBLES ↓<small>at least a pair • 8:1</small></button>
+        </div><div class="grid6" id="dblGrid"></div></div>
+        <div><div class="secT">Totals (payout shown)</div><div class="grid3" id="totalGrid" style="grid-template-columns:repeat(4,1fr)"></div></div>
+        <div><div class="secT">Single number (1×→1:1, 2×→2:1, 3×→3:1)</div><div class="grid6" id="singleGrid"></div></div>
+        <div><div class="secT">Two-combo 5:1 — tap 2 numbers, then “Add 2-combo”</div><div class="grid6" id="twoPick"></div>
+          <div style="display:flex;gap:8px;margin-top:6px"><button class="bet" id="addTwoBtn" style="flex:1">+ Add 2-combo</button><button class="bet" id="clearPickBtn" style="flex:1">Clear pick</button></div></div>
+        <div><div class="secT">Three-combo 30:1 — tap 3 numbers, then “Add 3-combo”</div><div class="grid6" id="threePick"></div>
+          <div style="display:flex;gap:8px;margin-top:6px"><button class="bet" id="addThreeBtn" style="flex:1">+ Add 3-combo</button></div></div>
+        <div><div class="secT">My bets (tap a bet to add a chip; tap again to stack)</div><div id="myBets">No bets yet.</div>
+          <button class="bet" id="clearBetsBtn" style="width:100%;margin-top:6px">Clear my bets</button></div>
+        <div id="actionRow"><button id="rollBtn">🎲 ROLL</button><button id="nextBtn">Next →</button></div>
+        <button class="tbtn" id="endBtn2">End game &amp; podium</button>
+      </div>
+    </main>
+  </div>
+  <div id="podium"><div class="card"><h2 style="margin:0 0 8px">🏁 Final podium</h2><div id="podiumRows"></div><div style="display:flex;gap:8px;margin-top:12px"><button class="tbtn" id="closePodium" style="flex:1">Close</button><button class="tbtn" id="restartBtn" style="flex:1">Restart</button></div></div></div>
+</div>
+<script src="sic-bo.js"></script>
+</body>
+</html>

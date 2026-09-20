@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Call Break ♠ — Langur Burja Friends</title>
+<link rel="stylesheet" href="../shared/theme.css">
+<style>.seats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.seat{background:var(--panel);border:1px solid #3a2f14;border-radius:12px;padding:8px;font-size:13px}.seat.lead{border-color:var(--gold)}.bid{font-size:20px;font-weight:800;color:var(--gold2)}.trickCenter{min-height:110px}.bidPick{display:flex;gap:6px;flex-wrap:wrap}.bidPick button{min-width:40px}</style>
+</head>
+<body>
+<div id="topbar"><button class="back" onclick="location.href='/'">←</button><div class="title">♠ Call Break (4 seats · 5 rounds)</div><div class="chips">🪙 <span id="chipCount">500</span></div><button class="iconbtn" id="muteBtn">🔊</button><button class="iconbtn" id="menuBtn">☰</button></div>
+<div id="layout">
+<aside id="sidebar"><h3>Players</h3><div id="players"></div><div class="roomcode" id="roomBox">Room</div><h3>Rules</h3><div class="rules">♠ Spades are trump.<br>Bid 1-8 clockwise from dealer.<br>Must follow suit · must trump if void & have ♠.<br>Highest led suit wins unless ♠ present → highest ♠.<br>Met: bid+0.1×extra · Missed: −bid.<br>5 rounds, 1st +30 · 2nd +10 · 3rd −10 · 4th −30.</div><div class="controls"><button class="btn" id="scoreBtn">Scoreboard</button><button class="btn btn-danger" id="leaveBtn">Leave</button></div></aside>
+<main id="main">
+<div class="phasebar" id="roundBar"></div>
+<div class="table"><div class="muted" id="info">Waiting…</div><div class="timerbar"><i id="timerFill" style="width:100%"></i></div>
+<div class="trickCenter" id="trick"></div>
+<div class="seats" id="seats"></div></div>
+<div class="muted">Your hand (tap a legal card to play)</div><div class="tray" id="tray"></div>
+<div class="controls" id="bidBox" style="display:none"><span class="muted">Your bid:</span><div class="bidPick" id="bidPick"></div></div>
+<div class="controls"><button class="btn btn-gold" id="startBtn">Start (host)</button><button class="btn" id="leadBtn">Sort Hand</button></div>
+</main>
+</div>
+<div id="overlay"></div>
+<script src="../shared/deck.js"></script><script src="../shared/sound.js"></script><script src="../shared/ws-client.js"></script><script src="call-break.js"></script>
+</body>
+</html>

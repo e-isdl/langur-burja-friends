@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Marriage Card Game — Langur Burja Friends</title>
+<link rel="stylesheet" href="../shared/theme.css">
+<style>.jokbar{display:flex;gap:6px;flex-wrap:wrap}.jok{border:1px solid var(--gold-dim);border-radius:8px;padding:6px 10px;font-size:12px;background:#00000066}.jok.wild{border-color:var(--gold);color:var(--gold2);font-weight:800}#stockInfo{font-size:12px;color:var(--muted)}</style>
+</head>
+<body>
+<div id="topbar"><button class="back" onclick="location.href='/'">←</button><div class="title">♥ Marriage (21 cards)</div><div class="chips">🪙 <span id="chipCount">500</span></div><button class="iconbtn" id="muteBtn">🔊</button><button class="iconbtn" id="menuBtn">☰</button></div>
+<div id="layout">
+<aside id="sidebar"><h3>Players</h3><div id="players"></div><div class="roomcode" id="roomBox">Room: -</div><h3>How to play</h3><div class="rules">3 decks · 21 cards each.<br>Phase 1: make <b>3 pure seq / tunnel</b> to unlock joker call.<br>Phase 2: host picks <b>Tiplu</b> rank = wild. Alter = next round joker preview, Man = fixed ★.<br>Win: cover all 21 in valid groups incl <b>7 dublees concept</b> (pairs) → Declare.<br>Draw from stock/discard, discard to end turn. 60s/turn.</div><div class="controls"><button class="btn" id="rejoinBtn">Rejoin</button><button class="btn btn-danger" id="leaveBtn">Leave</button></div></aside>
+<main id="main">
+<div class="phasebar" id="phaseBar"><div class="phase on" id="ph0">Phase 1: Pure (need 3)</div><div class="phase" id="ph1">Phase 2: Jokers</div><div class="phase" id="ph2">Declare</div></div>
+<div class="table"><div class="pileRow"><div><div class="muted">Stock (<span id="stockN">0</span>)</div><div class="card back large" id="stockPile">STK</div></div><div><div class="muted">Discard</div><div id="discardTop"></div></div><div><div class="muted">Jokers</div><div class="jokbar"><span class="jok" id="jTiplu">Tiplu: ?</span><span class="jok" id="jAlter">Alter: ?</span><span class="jok">Man: ★</span></div><div id="stockInfo"></div></div></div>
+<div class="timerbar"><i id="timerFill" style="width:100%"></i></div><div class="muted" id="turnInfo">Waiting…</div></div>
+<div class="muted">Your hand — tap to select · compact scroll</div>
+<div class="tray" id="tray"></div>
+<div class="controls"><button class="btn btn-gold" id="drawBtn">Draw Stock</button><button class="btn" id="takeDiscBtn">Take Discard</button><button class="btn" id="newGroupBtn">New Group</button><button class="btn" id="addGroupBtn">Add to group</button><button class="btn" id="suggestBtn">Auto-suggest</button><button class="btn btn-green" id="jokerBtn" disabled>Call Joker (need 3 pure)</button><button class="btn" id="discardBtn" disabled>Discard & End</button><button class="btn btn-gold" id="declareBtn">Declare Win</button></div>
+<div class="groups" id="groups"></div>
+<div class="controls"><button class="btn" id="startBtn">Start / Deal (host)</button><button class="btn" id="nextBtn">Next Turn (host)</button></div>
+</main>
+</div>
+<div id="overlay"></div>
+<script src="../shared/deck.js"></script><script src="../shared/sound.js"></script><script src="../shared/ws-client.js"></script><script src="marriage.js"></script>
+</body>
+</html>

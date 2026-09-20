@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Langur Burja & Friends — play Langur Burja, Teen Patti, Kitti and more with friends in a private lobby." />
+  <meta name="theme-color" content="#04070a" />
+  <title>Langur Burja &amp; Friends — Lobby</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="./shell.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>" />
+</head>
+<body>
+  <div id="reconnect-banner" class="banner" hidden role="status" aria-live="polite">
+    <span class="banner-dot" aria-hidden="true"></span>
+    <span id="reconnect-text">Reconnecting…</span>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo" aria-label="Langur Burja and Friends home">
+        <span class="logo-emoji" aria-hidden="true">🐒</span>
+        <h1 class="logo-text">Langur Burja <span class="logo-amp">&amp;</span> Friends</h1>
+      </div>
+      <div class="header-actions">
+        <button id="mute-btn" class="btn btn-ghost btn-icon" type="button" aria-label="Mute sounds" aria-pressed="false" title="Mute / unmute sounds">🔊</button>
+        <button id="rules-btn" class="btn btn-ghost" type="button" aria-haspopup="dialog" title="How to play">📖 Rules</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- ============ JOIN SCREEN ============ -->
+    <section id="join-screen" class="join-wrap" aria-labelledby="join-title">
+      <div class="join-card">
+        <h2 id="join-title">Join the table</h2>
+        <p class="subtitle">Create a private room or join with a code. No login needed.</p>
+
+        <label class="field" for="player-name">
+          <span class="field-label">Your name</span>
+          <input id="player-name" class="input" type="text" maxlength="20" placeholder="e.g. Himal" autocomplete="nickname" />
+        </label>
+
+        <label class="field" for="chips-input">
+          <span class="field-label">Buy-in chips</span>
+          <input id="chips-input" class="input" type="number" min="10" max="10000" step="10" value="200" inputmode="numeric" />
+        </label>
+
+        <button id="create-btn" class="btn btn-primary btn-block" type="button">🎲 Create room</button>
+
+        <div class="divider" aria-hidden="true"><span>or</span></div>
+
+        <label class="field" for="join-code">
+          <span class="field-label">Room code</span>
+          <input id="join-code" class="input input-code" type="text" maxlength="8" placeholder="e.g. KTM123" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        </label>
+        <button id="join-btn" class="btn btn-secondary btn-block" type="button">Join room</button>
+        <p class="hint">Tip: open an invite link and the code fills in automatically.</p>
+      </div>
+
+      <aside class="how-to card" aria-labelledby="howto-title">
+        <h3 id="howto-title">How it works</h3>
+        <ol>
+          <li><strong>Create</strong> a room and share the invite link.</li>
+          <li>Friends <strong>join</strong> with the 6-letter code.</li>
+          <li>Host picks <strong>starting chips</strong> and starts any of 10 games.</li>
+          <li>If you disconnect, just reopen the link — you <strong>reconnect</strong> automatically.</li>
+        </ol>
+        <div class="howto-meta">
+          <span>🎲 10 games</span>
+          <span>👥 2–8 players</span>
+          <span>⚡ realtime</span>
+        </div>
+      </aside>
+    </section>
+
+    <!-- ============ LOBBY SCREEN ============ -->
+    <section id="lobby-screen" class="lobby-wrap" hidden aria-labelledby="lobby-title">
+      <h2 id="lobby-title" class="sr-only">Game lobby</h2>
+
+      <div class="lobby-top card">
+        <div class="room-box">
+          <span class="room-label">Room code</span>
+          <strong id="room-code" class="room-code" aria-live="polite">------</strong>
+          <div class="room-actions">
+            <button id="copy-link-btn" class="btn btn-primary" type="button">🔗 Copy invite link</button>
+            <button id="leave-btn" class="btn btn-ghost" type="button">Leave</button>
+          </div>
+          <p class="invite-hint">Share the link — friends join straight into this lobby.</p>
+        </div>
+        <div class="chips-box">
+          <label class="field" for="starting-chips">
+            <span class="field-label">Starting chips <span id="host-only-tag" class="pill">host only</span></span>
+            <input id="starting-chips" class="input" type="number" min="10" max="10000" step="10" value="200" inputmode="numeric" />
+          </label>
+          <p class="chips-note">Applies to the next game you start.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <h3>Players (<span id="player-count">0</span>)</h3>
+          <span id="conn-status" class="conn conn-ok">● connected</span>
+        </div>
+        <div id="players-grid" class="players-grid" role="list" aria-label="Players in room"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <h3>Choose a game</h3>
+          <p id="waiting-msg" class="waiting" hidden>Waiting for host to start a game… 🃏</p>
+        </div>
+        <div id="game-grid" class="game-grid">
+          <article class="game-card" data-card="langur-burja">
+            <div class="game-icon" aria-hidden="true">🎲</div>
+            <h4>Langur Burja</h4>
+            <p>Crown &amp; anchor dice. Bet a symbol, roll six dice.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="langur-burja">Start</button>
+          </article>
+          <article class="game-card" data-card="teen-patti">
+            <div class="game-icon" aria-hidden="true">🃏</div>
+            <h4>Teen Patti</h4>
+            <p>3-card Indian poker. Trail beats pure sequence.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="teen-patti">Start</button>
+          </article>
+          <article class="game-card" data-card="phalas">
+            <div class="game-icon" aria-hidden="true">🍂</div>
+            <h4>Phalas</h4>
+            <p>Fast discard race. J=0, Q/K=10, A=1.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="phalas">Start</button>
+          </article>
+          <article class="game-card" data-card="call-break">
+            <div class="game-icon" aria-hidden="true">♠️</div>
+            <h4>Call Break</h4>
+            <p>Bid your tricks, break opponents. Spades are trump.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="call-break">Start</button>
+          </article>
+          <article class="game-card" data-card="jud-patti">
+            <div class="game-icon" aria-hidden="true">🂡</div>
+            <h4>Jud Patti</h4>
+            <p>Draw &amp; discard matching. Pair up, shed fast.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="jud-patti">Start</button>
+          </article>
+          <article class="game-card" data-card="marriage">
+            <div class="game-icon" aria-hidden="true">💍</div>
+            <h4>Marriage</h4>
+            <p>21-card marriage set game. Maal &amp; tiplu multiply the pot.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="marriage">Start</button>
+          </article>
+          <article class="game-card" data-card="in-between">
+            <div class="game-icon" aria-hidden="true">↔️</div>
+            <h4>In Between</h4>
+            <p>Card lands between two cards? Bet the gap.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="in-between">Start</button>
+          </article>
+          <article class="game-card" data-card="roulette">
+            <div class="game-icon" aria-hidden="true">🎡</div>
+            <h4>Roulette</h4>
+            <p>European wheel. Straight, split, red/black.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="roulette">Start</button>
+          </article>
+          <article class="game-card" data-card="kitti">
+            <div class="game-icon" aria-hidden="true">🐱</div>
+            <h4>Kitti</h4>
+            <p>9-card party pot. Best triple split wins the pot.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="kitti">Start</button>
+          </article>
+          <article class="game-card" data-card="sic-bo">
+            <div class="game-icon" aria-hidden="true">🎲</div>
+            <h4>Sic Bo</h4>
+            <p>3-dice over/under. Small/big, triples &amp; totals.</p>
+            <button class="btn btn-primary btn-sm start-btn" type="button" data-game="sic-bo">Start</button>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="rules-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="rules-title">📖 House rules</h3>
+        <button id="rules-close" class="btn btn-ghost btn-icon" type="button" aria-label="Close rules">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li>Rooms hold <strong>2–8 players</strong>. Host starts games.</li>
+          <li>Everyone starts with the same <strong>starting chips</strong>.</li>
+          <li>Disconnect? Reopen your invite link — your seat is kept.</li>
+          <li>Teen Patti hand order: <strong>Trail &gt; Pure &gt; Sequence &gt; Flush &gt; Pair &gt; High</strong>. A-2-3 pure is the highest pure.</li>
+          <li>Kitti: 9 cards, 3 brags — best triple split wins the pot.</li>
+          <li>Phalas points: <strong>J=0, Q=10, K=10, A=1</strong>, numbers face value.</li>
+          <li>Play fair — no peeking at other tabs. 🐒</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="error-toast" class="toast" hidden role="alert" aria-live="assertive"></div>
+
+  <footer class="footer">
+    <p>Made for chiya-time card nights ☕ — Langur Burja &amp; Friends</p>
+  </footer>
+
+  <script src="./shared/sound.js"></script>
+  <script src="./shared/ws-client.js"></script>
+  <script src="./shell.js"></script>
+</body>
+</html>

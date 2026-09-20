@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Phalas (Dhumbal) — Langur Burja Friends</title>
+<link rel="stylesheet" href="../shell.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="../shared/sound.js"></script>
+<script src="../shared/deck.js"></script>
+<script src="../shared/ws-client.js"></script>
+<style>
+:root{--gold:#d4af37;--gold2:#f5d67b;--bg:#0e0d0b;--bg2:#171410;--mut:#9a8c6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:#f3e9cf;font-family:system-ui,sans-serif;min-height:100vh}
+body{max-width:480px;margin:0 auto;border-left:1px solid #2a241a;border-right:1px solid #2a241a;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#1c1710,#12100c);border-bottom:1px solid var(--gold);position:sticky;top:0;z-index:20}
+.topbar button{background:#241d12;border:1px solid var(--gold);color:var(--gold2);border-radius:8px;padding:6px 10px;cursor:pointer}
+.title{font-family:'Playfair Display',serif;color:var(--gold2);font-size:17px;flex:1;text-align:center}
+.chips-pill{background:#000;border:1px solid var(--gold);border-radius:20px;padding:4px 10px;font-size:13px;color:var(--gold2)}
+.layout{display:flex;flex:1;min-height:0}
+#players{width:112px;background:var(--bg2);border-right:1px solid #2a241a;padding:8px 6px;display:flex;flex-direction:column;gap:8px}
+.pl{background:#14110d;border:1px solid #333;border-radius:10px;padding:6px;font-size:12px}
+.pl.active{border-color:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.55)}
+.pl.out{opacity:.4}
+.pl .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .ch{color:var(--gold2)}
+.tablewrap{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#timerBar{height:6px;background:#2a241a;border-radius:4px;overflow:hidden}
+#timerFill{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),#ffefb0);transition:width 1s linear}
+#potBox{text-align:center;border:1px solid var(--gold);border-radius:14px;padding:8px;background:radial-gradient(circle at 50% 30%,#2a2214,#12100c)}
+#potVal{font-size:22px;color:var(--gold2);font-weight:800}
+#totalBox{text-align:center;font-size:15px}
+#totalVal{font-size:26px;font-weight:800;color:var(--gold2)}
+#dhumbalBtn.glow{box-shadow:0 0 16px rgba(212,175,55,.9);background:#2b2314;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{transform:scale(1.03)}}
+#centerRow{display:flex;gap:10px;justify-content:center}
+.pile{width:92px;text-align:center;font-size:11px;color:var(--mut)}
+.slot{width:74px;height:102px;margin:4px auto;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:18px;border:2px solid var(--gold);cursor:pointer}
+.slot.stock{background:linear-gradient(135deg,#12351f,#0e0d0b);color:var(--gold2)}
+.slot.discard{background:linear-gradient(180deg,#fffdf5,#f0e6c8);color:#111}
+.card{width:56px;height:80px;border-radius:10px;background:linear-gradient(180deg,#fffdf5,#f0e6c8);color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:17px;border:2px solid var(--gold);cursor:pointer;user-select:none}
+.card.red{color:#b01e1e}.card.sel{outline:3px solid #4da3ff;transform:translateY(-4px)}
+.card.laid{opacity:.55;border-color:#1d5c3f}
+#handRow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:86px;background:#12100c;border:1px solid #3a3120;border-radius:12px;padding:8px}
+#laidRow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:30px}
+#scoreboard{font-size:12px;background:#14110d;border:1px solid #3a3120;border-radius:10px;padding:6px}
+#msg{font-size:13px;color:#ffe9a8;text-align:center;min-height:20px}
+.controls{position:sticky;bottom:0;background:#12100c;border-top:1px solid var(--gold);padding:10px;display:flex;gap:8px;flex-wrap:wrap}
+.controls button{flex:1;min-width:80px;background:#241d12;border:1px solid var(--gold);color:var(--gold2);border-radius:10px;padding:11px 6px;font-weight:700;cursor:pointer}
+.controls button:disabled{opacity:.35}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#overlay.show{display:flex}
+.sheet{background:#171310;border:1px solid var(--gold);border-radius:16px;padding:18px;max-width:380px;width:100%;text-align:center;max-height:90vh;overflow-y:auto}
+.sheet h2{font-family:'Playfair Display',serif;color:var(--gold2);margin:0 0 8px}
+.sheet .row{display:flex;gap:8px;margin-top:12px}
+.sheet .row button{flex:1;padding:11px;border-radius:10px;border:1px solid var(--gold);background:#241d12;color:var(--gold2);font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar"><button id="backBtn">←</button><div class="title">Phalas • Dhumbal</div><div class="chips-pill">🪙 <span id="chipsMe">500</span></div><button id="muteBtn">🔊</button></div>
+<div class="layout"><aside id="players"></aside>
+<div class="tablewrap">
+<div id="timerBar"><div id="timerFill"></div></div>
+<div id="potBox">POT<div id="potVal">0</div><div style="font-size:11px;color:#9a8c6b">Ante 5 • A1 2-10 J0 Q10 K10</div></div>
+<div id="totalBox">Your total<div id="totalVal">0</div><div style="font-size:11px;color:#9a8c6b">Call Dhumbal at ≤10</div></div>
+<div id="centerRow">
+<div class="pile">STOCK<div class="slot stock" id="stockSlot">🂠<br><span id="stockCount"></span></div></div>
+<div class="pile">DISCARD<div class="slot discard" id="discardSlot">—</div></div>
+</div>
+<div id="msg">Connecting…</div>
+<div style="font-size:11px;color:#9a8c6b;text-align:center">Your hand — tap 3+ to select set/run then Lay</div>
+<div id="handRow"></div>
+<div id="laidRow"></div>
+<div id="scoreboard">Points: —</div>
+</div></div>
+<div class="controls">
+<button id="layBtn">Lay Set/Run</button>
+<button id="dhumbalBtn">Call Dhumbal</button>
+<button id="sortBtn">Sort</button>
+</div>
+<div id="overlay"><div class="sheet"><h2 id="resultTitle">Dhumbal</h2><p id="resultText"></p><div id="resultDetail" style="font-size:13px;text-align:left"></div><div class="row"><button id="nextBtn">Next Round</button><button id="lobbyBtn">Back to Lobby</button></div></div></div>
+<script src="./phalas.js"></script>
+</body>
+</html>

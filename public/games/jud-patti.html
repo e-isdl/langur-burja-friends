@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jud Patti — Langur Burja Friends</title>
+<link rel="stylesheet" href="../shell.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="../shared/sound.js"></script>
+<script src="../shared/deck.js"></script>
+<script src="../shared/ws-client.js"></script>
+<style>
+:root{--gold:#d4af37;--gold2:#f5d67b;--bg:#0e0d0b;--bg2:#171410;--mut:#9a8c6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:#f3e9cf;font-family:system-ui,sans-serif;min-height:100vh}
+body{max-width:480px;margin:0 auto;border-left:1px solid #2a241a;border-right:1px solid #2a241a;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#1c1710,#12100c);border-bottom:1px solid var(--gold);position:sticky;top:0;z-index:20}
+.topbar button{background:#241d12;border:1px solid var(--gold);color:var(--gold2);border-radius:8px;padding:6px 10px;cursor:pointer}
+.title{font-family:'Playfair Display',serif;color:var(--gold2);font-size:19px;flex:1;text-align:center}
+.chips-pill{background:#000;border:1px solid var(--gold);border-radius:20px;padding:4px 10px;font-size:13px;color:var(--gold2)}
+.layout{display:flex;flex:1;min-height:0}
+#players{width:104px;background:var(--bg2);border-right:1px solid #2a241a;padding:8px 6px;display:flex;flex-direction:column;gap:8px}
+.pl{background:#14110d;border:1px solid #333;border-radius:10px;padding:6px;font-size:12px}
+.pl.active{border-color:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.55)}
+.pl .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .ch{color:var(--gold2)}
+.tablewrap{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#timerBar{height:6px;background:#2a241a;border-radius:4px;overflow:hidden}
+#timerFill{height:100%;width:100%;background:linear-gradient(90deg,var(--gold),#ffefb0);transition:width 1s linear}
+#potBox{text-align:center;border:1px solid var(--gold);border-radius:14px;padding:8px;background:radial-gradient(circle at 50% 30%,#2a2214,#12100c)}
+#potVal{font-size:22px;color:var(--gold2);font-weight:800}
+#centerRow{display:flex;gap:10px;justify-content:center}
+.pile{width:86px;text-align:center;font-size:11px;color:var(--mut)}
+.pile .slot{width:72px;height:100px;margin:4px auto;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:18px;border:2px solid var(--gold)}
+.slot.stock{background:linear-gradient(135deg,#5a1010,#1a0d0d);color:var(--gold2);cursor:pointer}
+.slot.discard{background:linear-gradient(180deg,#fffdf5,#f0e6c8);color:#111;cursor:pointer}
+.slot.joker{box-shadow:0 0 14px rgba(212,175,55,.9);background:linear-gradient(180deg,#fff8d6,#f0d67a);color:#111}
+.slot.empty{background:#14110d;color:#5a4d2e}
+.card{width:56px;height:80px;border-radius:10px;background:linear-gradient(180deg,#fffdf5,#f0e6c8);color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:17px;border:2px solid var(--gold);cursor:pointer;user-select:none}
+.card.red{color:#b01e1e}.card.pairglow{box-shadow:0 0 12px #4da3ff;outline:2px solid #4da3ff;transform:translateY(-4px)}
+.card.dimpick{opacity:.9}
+#handRow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:86px;background:#12100c;border:1px solid #3a3120;border-radius:12px;padding:8px}
+#laidRow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:40px;font-size:11px}
+.laidpair{display:flex;gap:4px;background:#1d2a1f;border:1px solid var(--gold);border-radius:8px;padding:4px}
+#msg{font-size:13px;color:#ffe9a8;text-align:center;min-height:20px}
+.controls{position:sticky;bottom:0;background:#12100c;border-top:1px solid var(--gold);padding:10px;display:flex;gap:8px}
+.controls button{flex:1;background:#241d12;border:1px solid var(--gold);color:var(--gold2);border-radius:10px;padding:11px 6px;font-weight:700;cursor:pointer}
+.controls button:disabled{opacity:.35}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#overlay.show{display:flex}
+.sheet{background:#171310;border:1px solid var(--gold);border-radius:16px;padding:18px;max-width:360px;width:100%;text-align:center}
+.sheet h2{font-family:'Playfair Display',serif;color:var(--gold2);margin:0 0 8px}
+.sheet .row{display:flex;gap:8px;margin-top:12px}
+.sheet .row button{flex:1;padding:11px;border-radius:10px;border:1px solid var(--gold);background:#241d12;color:var(--gold2);font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar"><button id="backBtn">←</button><div class="title">Jud Patti</div><div class="chips-pill">🪙 <span id="chipsMe">500</span></div><button id="muteBtn">🔊</button></div>
+<div class="layout"><aside id="players"></aside>
+<div class="tablewrap">
+<div id="timerBar"><div id="timerFill"></div></div>
+<div id="potBox">POT<div id="potVal">0</div><div style="font-size:11px;color:#9a8c6b">Ante 5 • 7 cards • joker wild</div></div>
+<div id="centerRow">
+<div class="pile">STOCK<div class="slot stock" id="stockSlot">🂠<br><span id="stockCount"></span></div><div>tap to draw</div></div>
+<div class="pile">JOKER<div class="slot joker" id="jokerSlot">?</div><div id="jokerRank">wild</div></div>
+<div class="pile">DISCARD<div class="slot discard" id="discardSlot">—</div><div>tap to take</div></div>
+</div>
+<div id="msg">Connecting…</div>
+<div style="font-size:11px;color:#9a8c6b;text-align:center">Laid pairs (face-up)</div>
+<div id="laidRow"></div>
+<div style="font-size:11px;color:#9a8c6b;text-align:center">Your hand — tap stock/discard, then tap glowing pair, then tap card to discard</div>
+<div id="handRow"></div>
+</div></div>
+<div class="controls"><button id="sortBtn">Sort</button><button id="foldBtn">Fold</button></div>
+<div id="overlay"><div class="sheet"><h2 id="resultTitle">Winner</h2><p id="resultText"></p><div class="row"><button id="nextBtn">Next Deal</button><button id="lobbyBtn">Back to Lobby</button></div></div></div>
+<script src="./jud-patti.js"></script>
+</body>
+</html>

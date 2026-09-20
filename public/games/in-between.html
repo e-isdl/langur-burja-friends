@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>In-Between — Langur Burja Friends</title>
+<link rel="stylesheet" href="../shared/theme.css">
+<style>.bigCards{display:flex;gap:14px;justify-content:center;align-items:center}.rangeTxt{text-align:center;color:var(--gold2);font-weight:800;margin-top:6px}#thirdWrap{text-align:center;min-height:120px}</style>
+</head>
+<body>
+<div id="topbar"><button class="back" onclick="location.href='/'">←</button><div class="title">🃏 In-Between (4-deck shoe)</div><div class="chips">🪙 <span id="chipCount">500</span></div><button class="iconbtn" id="muteBtn">🔊</button><button class="iconbtn" id="menuBtn">☰</button></div>
+<div id="layout">
+<aside id="sidebar"><h3>Players</h3><div id="players"></div><div class="roomcode" id="roomBox">Room</div><h3>Rules</h3><div class="rules">Host draws 2 boundary cards. Bet whether 3rd falls <b>Between</b>.<br>Payouts: gap1 11:1 · gap2 5:1 · gap3 4:1 · gap4+ 1:1.<br>Consecutive or boundary match = loss.<br>30s betting · 4-deck shoe anti-counting.</div><div class="controls"><button class="btn btn-danger" id="leaveBtn">Leave</button></div></aside>
+<main id="main">
+<div class="phasebar"><div class="phase on" id="phBet">Bets (30s)</div><div class="phase" id="phRev">Reveal</div></div>
+<div class="table"><div class="bigCards"><div id="cardA"></div><div class="muted">vs</div><div id="cardB"></div></div><div class="rangeTxt" id="rangeTxt">—</div><div class="timerbar"><i id="timerFill" style="width:100%"></i></div><div class="muted" id="info" style="text-align:center">Waiting…</div><div id="thirdWrap"></div><div id="winFlash" style="text-align:center;font-weight:800"></div></div>
+<div class="controls"><span class="muted">Stake:</span><div class="betrow" id="stakeRow"></div></div>
+<div class="controls"><button class="btn btn-gold" id="betBtn">Bet BETWEEN</button><button class="btn" id="passBtn">Pass</button><button class="btn btn-green" id="dealBtn">Deal Boundaries (host)</button><button class="btn" id="revealBtn">Reveal 3rd (host)</button><button class="btn" id="nextBtn">Fast Next Round (host)</button></div>
+<div class="muted" id="betsLine">No bets yet</div>
+</main>
+</div>
+<div id="overlay"></div>
+<script src="../shared/deck.js"></script><script src="../shared/sound.js"></script><script src="../shared/ws-client.js"></script><script src="in-between.js"></script>
+</body>
+</html>
