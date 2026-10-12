@@ -1,0 +1,21 @@
+{
+  "name": "langur-burja-friends",
+  "version": "2.0.0",
+  "description": "Private card table for friends. Server-authoritative games, bots, reconnect, khata ledger.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "live": "node live.js",
+    "test": "node test/sim.js",
+    "room": "node test/room.test.js",
+    "langurtest": "node test/langur.test.js",
+    "langur": "node test/langur-shots.js",
+    "shots": "node test/shots.js"
+  },
+  "engines": { "node": ">=18" },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
